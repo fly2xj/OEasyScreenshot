@@ -394,6 +394,9 @@ void OEScreenshot::keyPressEvent(QKeyEvent *e) {
     if (e->key() == Qt::Key_Escape) {
         close();
     }
+	else if (e->key() == Qt::Key_C) {
+		amplifierTool_->saveColor();
+	}
     else {
         e->ignore();
     }
@@ -410,7 +413,7 @@ void OEScreenshot::keyPressEvent(QKeyEvent *e) {
 OERect::OERect(QWidget *parent) : QWidget(parent) {
 
     /// 设置感知器默认大小
-    setFixedSize(95 * OECommonHelper::getWindowHeightMultiplyingPower(),
+    setFixedSize(225 * OECommonHelper::getWindowHeightMultiplyingPower(),
                  20 * OECommonHelper::getWindowHeightMultiplyingPower());
 
     /// 填充默认背景
@@ -441,7 +444,11 @@ void OERect::onPostionChange(int x, int y) {
 }
 
 void OERect::onSizeChange(int w, int h) {
-    info_ = QString("%1 × %2").arg(w).arg(h);
+    info_ = QString("%1 × %2 (%3×%4 %5%)")
+		.arg(int(w/ OECommonHelper::getWindowHeightMultiplyingPower()))
+		.arg(int(h/ OECommonHelper::getWindowHeightMultiplyingPower()))
+		.arg(w).arg(h)
+		.arg(int(100* OECommonHelper::getWindowHeightMultiplyingPower()));
 }
 
 
@@ -457,10 +464,10 @@ OEScreen::OEScreen(std::shared_ptr<QPixmap> originPainting, QPoint pos, QWidget 
     : QWidget(parent), direction_(NONE), originPoint_(pos),
       isPressed_(false), originPainting_(originPainting) {
     menu_ = new QMenu(this);
-    menu_->addAction(QStringLiteral("完成截图"), this, SLOT(onSaveScreen()));
-    menu_->addAction(QStringLiteral("保存"), this, SLOT(onSaveScreenOther()));
+    menu_->addAction(QStringLiteral("Finish"), this, SLOT(onSaveScreen()));
+    menu_->addAction(QStringLiteral("Save"), this, SLOT(onSaveScreenOther()));
     menu_->addSeparator();
-    menu_->addAction(QStringLiteral("退出截图"), this, SLOT(quitScreenshot()));
+    menu_->addAction(QStringLiteral("Exit"), this, SLOT(quitScreenshot()));
 
     /// 双击即完成
     connect(this, SIGNAL(doubleClick()),
@@ -741,7 +748,13 @@ void OEScreen::onSaveScreenOther(void) {
 void OEScreen::onSaveScreen(void) {
     /// 把图片放入剪切板
     QClipboard *board = QApplication::clipboard();
-    board->setPixmap(originPainting_->copy(currentRect_));
+	if (OECommonHelper::getWindowHeightMultiplyingPower() == 1)
+		board->setPixmap(originPainting_->copy(currentRect_));
+	else {
+		QPixmap img = originPainting_->copy(currentRect_);
+		board->setPixmap(img.scaledToWidth(img.width() / OECommonHelper::getWindowHeightMultiplyingPower(), Qt::SmoothTransformation));
+	}
+
     /// 退出当前截图工具
     quitScreenshot();
 }

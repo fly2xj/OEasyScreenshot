@@ -44,7 +44,7 @@ class OEAmplifier : public QWidget
     Q_OBJECT
 public:
     explicit OEAmplifier(std::shared_ptr<QPixmap> originPainting, QWidget *parent = 0);
-
+	void saveColor();
 signals:
 
 public slots:
@@ -86,7 +86,7 @@ private:
     int imageHeight_;
     /// 屏幕原画
     std::shared_ptr<QPixmap> originPainting_;
-
+	QString select_pt_rgb_;
 };
 
 #endif /// OEAMPLIFIER_H

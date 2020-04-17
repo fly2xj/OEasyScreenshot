@@ -18,7 +18,7 @@ Widget::Widget(QWidget *parent) :
     openScreenshotButton_->setText(QStringLiteral(
                              "单击我\n\n快捷键( Shift+A )"));
     QxtGlobalShortcut* shortcut = new QxtGlobalShortcut(
-                            QKeySequence("Shift+A"), this);
+                            QKeySequence("F1"), this);
 
     connect(shortcut, SIGNAL(activated()),
             this, SLOT(onScreenshot()));

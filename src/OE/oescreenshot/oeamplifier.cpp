@@ -33,6 +33,8 @@
 
 #include <QPixmap>
 #include <QPainter>
+#include <QApplication>
+#include <QClipboard>
 
 #ifndef QT_NO_DEBUG
 #include <QDebug>
@@ -133,19 +135,28 @@ void OEAmplifier::paintEvent(QPaintEvent *) {
     painter.drawRect(0,0,width()-1,height()-1);
 
     /// 当前选中矩形的宽高信息;
-    QString select_screen_info = QString("%1×%2")
+    QString select_screen_info = QString("%1×%2 (%3×%4)")
+			.arg(int(screenSize_.width() / OECommonHelper::getWindowHeightMultiplyingPower()))
+			.arg(int(screenSize_.height() / OECommonHelper::getWindowHeightMultiplyingPower()))
             .arg(screenSize_.width()).arg(screenSize_.height());
 
     /// 当前鼠标像素值的RGB信息
     QImage image = originPainting_->toImage();
     QColor cursor_pixel = image.pixel(cursorPoint_);
-    QString select_pt_rgb = QString("RGB:(%1,%2,%3)")
-                                    .arg(cursor_pixel.red())
-                                    .arg(cursor_pixel.green())
-                                    .arg(cursor_pixel.blue());
+	select_pt_rgb_ = QString("#%1%2%3")
+                                    .arg(cursor_pixel.red(),2,16, QChar('0'))
+                                    .arg(cursor_pixel.green(),2,16, QChar('0'))
+                                    .arg(cursor_pixel.blue(),2,16, QChar('0'));
+	QString color_info = QString("RGB:(") + select_pt_rgb_ + QString(")");
 
     /// 绘制坐标轴相关数据
     painter.setPen(Qt::white);
     painter.drawText(QPoint(6, imageHeight_+14),select_screen_info);
-    painter.drawText(QPoint(6, imageHeight_+27),select_pt_rgb);
+    painter.drawText(QPoint(6, imageHeight_+32), color_info);
+}
+
+void OEAmplifier::saveColor()
+{
+	QClipboard *board = QApplication::clipboard();
+	board->setText(select_pt_rgb_);
 }

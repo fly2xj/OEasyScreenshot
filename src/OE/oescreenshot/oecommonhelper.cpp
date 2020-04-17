@@ -35,9 +35,9 @@
 #include <QApplication>
 #include <QWidget>
 #include <QDesktopWidget>
-
+ 
 #include <windows.h>
-
+ 
 #ifndef QT_NO_DEBUG
 #include <QDebug>
 #endif
@@ -86,11 +86,20 @@ const float & OECommonHelper::getWindowHeightMultiplyingPower() {
 }
 
 void OECommonHelper::upWindowSizeMultiplyingPower() {
+#ifdef _WIN32 
+	const float DEFAULT_DPI = 96.0;
+	HDC screen = GetDC(NULL);
+	FLOAT dpiX = static_cast<FLOAT>(GetDeviceCaps(screen, LOGPIXELSX));
+	ReleaseDC(0, screen);
+
+	widthMultiplyingPower_ = heightMultiplyingPower_ = dpiX / DEFAULT_DPI;
+#else
    QSize temp_size = QApplication::desktop()->size();
    widthMultiplyingPower_ = (float)temp_size.width()
            / (float)WINDOW_BASESIZE_WIDTH;
    heightMultiplyingPower_ = (float)temp_size.height()
            / (float)WINDOW_BASESIZE_HEIGHT;
+#endif
 }
 
 bool OECommonHelper::getSmallestWindowFromCursor(QRect& out_rect) {
